@@ -10,6 +10,5 @@ public class Main {
      * @param arguments arguments are command line arguments that you can specify.
      */
     public static void main(String[] arguments) {
-
     }
 }

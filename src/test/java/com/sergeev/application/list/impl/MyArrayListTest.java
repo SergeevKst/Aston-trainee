@@ -1,12 +1,18 @@
 package com.sergeev.application.list.impl;
 
+import com.sergeev.application.exception.InvalidArgumentException;
 import com.sergeev.application.list.MyList;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Comparator;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MyArrayListTest {
     private MyList<Integer> myList;
@@ -24,7 +30,7 @@ public class MyArrayListTest {
         //when
         myList.add(index, value);
         //then
-        Assertions.assertEquals(index, myList.indexOf(value));
+        assertEquals(index, myList.indexOf(value));
     }
 
     @Test
@@ -37,8 +43,7 @@ public class MyArrayListTest {
         myList.add(index, value);
         myList.add(index, value2);
         //then
-        Assertions.assertEquals(index, myList.indexOf(value2));
-        Assertions.assertEquals(2, myList.indexOf(value));
+        assertEquals(2, myList.indexOf(value));
     }
 
     @Test
@@ -47,13 +52,14 @@ public class MyArrayListTest {
         int index = myList.size() + 100;
         Integer value = 2;
         //when
-        var exception = Assertions.assertThrows(IndexOutOfBoundsException.class, () -> myList.add(index, value));
+        var exception = assertThrows(InvalidArgumentException.class, () -> myList.add(index, value));
         //then
-        Assertions.assertEquals("Invalid bond", exception.getMessage());
+        assertEquals("Invalid bond", exception.getMessage());
     }
 
-    @Test
-    public void constructorTest() {
+    @ParameterizedTest
+    @MethodSource("getArguments")
+    public void constructorTest(Integer testValue) {
         //given
         MyList<Integer> testList = new MyArrayList<>();
         Integer value = 2;
@@ -63,8 +69,7 @@ public class MyArrayListTest {
         testList.add(value2);
         myList = new MyArrayList<>(testList);
         //then
-        Assertions.assertTrue(myList.contains(value));
-        Assertions.assertTrue(myList.contains(value2));
+        assertTrue(myList.contains(testValue));
     }
 
     @Test
@@ -75,7 +80,7 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertEquals(index, myList.indexOf(value));
+        assertEquals(index, myList.indexOf(value));
     }
 
     @Test
@@ -87,8 +92,7 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertEquals(value, myList.set(index, value2));
-        Assertions.assertTrue(myList.contains(value2));
+        assertEquals(value, myList.set(index, value2));
     }
 
     @Test
@@ -99,9 +103,9 @@ public class MyArrayListTest {
         int index = myList.size() + 100;
         //when
         myList.add(value);
-        var exception = Assertions.assertThrows(IndexOutOfBoundsException.class, () -> myList.set(index, value2));
+        var exception = assertThrows(InvalidArgumentException.class, () -> myList.set(index, value2));
         //then
-        Assertions.assertEquals("Invalid bond", exception.getMessage());
+        assertEquals("Invalid bond", exception.getMessage());
     }
 
     @Test
@@ -111,9 +115,9 @@ public class MyArrayListTest {
         int index = myList.size() + 100;
         //when
         myList.add(value);
-        var exception = Assertions.assertThrows(IndexOutOfBoundsException.class, () -> myList.get(index));
+        var exception = assertThrows(InvalidArgumentException.class, () -> myList.get(index));
         //then
-        Assertions.assertEquals("Invalid bond", exception.getMessage());
+        assertEquals("Invalid bond", exception.getMessage());
     }
 
     @Test
@@ -124,11 +128,12 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertEquals(value, myList.get(index));
+        assertEquals(value, myList.get(index));
     }
 
-    @Test
-    public void addAllTest() {
+    @ParameterizedTest
+    @MethodSource("getArguments")
+    public void addAllTest(Integer testValue) {
         //given
         MyList<Integer> testList = new MyArrayList<>();
         Integer value = 2;
@@ -138,17 +143,17 @@ public class MyArrayListTest {
         testList.add(value2);
         myList.addAll(testList);
         //then
-        Assertions.assertTrue(myList.contains(value));
-        Assertions.assertTrue(myList.contains(value2));
+        assertTrue(myList.contains(testValue));
     }
 
-    @Test
-    public void addAllInNotEmptyListTest() {
+    @ParameterizedTest
+    @MethodSource("getArguments")
+    public void addAllInNotEmptyListTest(Integer testValue) {
         //given
         MyList<Integer> testList = new MyArrayList<>();
-        Integer value = 2;
+        Integer value = 3;
         Integer value2 = 4;
-        Integer value3 = 3;
+        Integer value3 = 2;
         Integer value4 = 4;
         //when
         myList.add(value);
@@ -157,8 +162,8 @@ public class MyArrayListTest {
         testList.add(value4);
         myList.addAll(testList);
         //then
-        Assertions.assertTrue(myList.contains(value3));
-        Assertions.assertTrue(myList.contains(value4));
+        assertTrue(myList.contains(testValue));
+
     }
 
     @Test
@@ -168,7 +173,7 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertTrue(myList.contains(value));
+        assertTrue(myList.contains(value));
     }
 
     @Test
@@ -178,7 +183,7 @@ public class MyArrayListTest {
         //when
         int sizeDefault = myList.size();
         //then
-        Assertions.assertEquals(size, sizeDefault);
+        assertEquals(size, sizeDefault);
     }
 
     @Test
@@ -189,7 +194,7 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertEquals(value, myList.remove(index));
+        assertEquals(value, myList.remove(index));
     }
 
     @Test
@@ -199,9 +204,9 @@ public class MyArrayListTest {
         int index = myList.size() + 100;
         //when
         myList.add(value);
-        var exception = Assertions.assertThrows(IndexOutOfBoundsException.class, () -> myList.remove(index));
+        var exception = assertThrows(InvalidArgumentException.class, () -> myList.remove(index));
         //then
-        Assertions.assertEquals("Invalid bond", exception.getMessage());
+        assertEquals("Invalid bond", exception.getMessage());
     }
 
     @Test
@@ -211,7 +216,7 @@ public class MyArrayListTest {
         //when
         myList.add(value);
         //then
-        Assertions.assertTrue(myList.remove(value));
+        assertTrue(myList.remove(value));
     }
 
     @Test
@@ -222,7 +227,7 @@ public class MyArrayListTest {
         myList.add(value);
         myList.clear();
         //then
-        Assertions.assertFalse(myList.contains(value));
+        assertFalse(myList.contains(value));
     }
 
     @Test
@@ -232,7 +237,7 @@ public class MyArrayListTest {
         //when
         myList.add(test);
         //then
-        Assertions.assertEquals(1, myList.size());
+        assertEquals(1, myList.size());
     }
 
     @Test
@@ -240,7 +245,7 @@ public class MyArrayListTest {
         //given
         boolean empty = myList.isEmpty();
         //then
-        Assertions.assertTrue(empty);
+        assertTrue(empty);
     }
 
     @Test
@@ -253,15 +258,15 @@ public class MyArrayListTest {
         int value2 = testArray[1];
         int value3 = testArray[2];
         //then
-        Assertions.assertEquals(1, value);
-        Assertions.assertEquals(2, value2);
-        Assertions.assertEquals(3, value3);
+        assertEquals(1, value);
+        assertEquals(2, value2);
+        assertEquals(3, value3);
     }
 
     @Test
     public void quickSortComparatorTest() {
         //given
-        String[] testArray = {"B", "C", "A"};
+        String[] testArray = {"A", "B", "C"};
         Comparator<String> comparator = String::compareTo;
         //when
         myList.quickSort(testArray, 0, testArray.length - 1, comparator);
@@ -269,13 +274,20 @@ public class MyArrayListTest {
         String value2 = testArray[1];
         String value3 = testArray[2];
         //then
-        Assertions.assertEquals("A", value);
-        Assertions.assertEquals("B", value2);
-        Assertions.assertEquals("C", value3);
+        assertEquals("A", value);
+        assertEquals("B", value2);
+        assertEquals("C", value3);
     }
 
     @AfterEach
     public void destroy() {
         myList = null;
+    }
+
+    public static Stream<Arguments> getArguments() {
+        return Stream.of(
+                Arguments.of(2),
+                Arguments.of(4)
+        );
     }
 }

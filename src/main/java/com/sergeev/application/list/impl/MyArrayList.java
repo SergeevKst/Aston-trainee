@@ -61,19 +61,19 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public void add(int index, T obj) {
         checkLength(index);
-        for (int i = 0; i < defaultArray.length; i++) {
-            if (i == index && defaultArray[i] == null) {
-                defaultArray[i] = obj;
-                size++;
-            } else if (i == index && defaultArray[i] != null) {
-                Object[] list = new Object[defaultArray.length + 1];
-                System.arraycopy(defaultArray, 0, list, 0, index);
-                list[index] = obj;
-                System.arraycopy(defaultArray, index, list, index + 1, defaultArray.length - index);
-                defaultArray = list;
-                size++;
-            }
+        if (index == size) {
+            enhanceLength();
         }
+        if (defaultArray[index] == null) {
+            defaultArray[index] = obj;
+        } else if (defaultArray[index] != null) {
+            Object[] list = new Object[defaultArray.length + 1];
+            System.arraycopy(defaultArray, 0, list, 0, index);
+            list[index] = obj;
+            System.arraycopy(defaultArray, index, list, index + 1, defaultArray.length - index);
+            defaultArray = list;
+        }
+        size++;
     }
 
     /**
@@ -83,7 +83,7 @@ public class MyArrayList<T> implements MyList<T> {
      */
     @Override
     public Object[] toArray() {
-        Object[] list = new Object[size + DEFAULT_CAPACITY];
+        Object[] list = new Object[size + 1];
         System.arraycopy(defaultArray, 0, list, 0, size);
         return list;
     }
@@ -99,10 +99,13 @@ public class MyArrayList<T> implements MyList<T> {
     public boolean add(T obj) {
         for (int i = 0; i < defaultArray.length; i++) {
             if (defaultArray[i] == null) {
-                Object[] list = new Object[defaultArray.length + 1];
-                System.arraycopy(defaultArray, 0, list, 0, defaultArray.length);
-                list[i] = obj;
-                defaultArray = list;
+                defaultArray[i] = obj;
+                size++;
+                return true;
+            }
+            if (i == defaultArray.length - 1) {
+                enhanceLength();
+                defaultArray[defaultArray.length - 1] = obj;
                 size++;
                 return true;
             }
@@ -116,7 +119,9 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public void clear() {
         for (int i = 0; i < defaultArray.length; i++) {
-            if (defaultArray[i] != null) defaultArray[i] = null;
+            if (defaultArray[i] != null) {
+                defaultArray[i] = null;
+            }
         }
     }
 
@@ -130,18 +135,13 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public T remove(int index) {
         checkLength(index);
-        for (int i = 0; i < defaultArray.length; i++) {
-            if (i == index) {
-                Object value = defaultArray[i];
-                Object[] list = new Object[defaultArray.length - 1];
-                System.arraycopy(defaultArray, 0, list, 0, i);
-                System.arraycopy(defaultArray, i + 1, list, i, defaultArray.length - i - 1);
-                defaultArray = list;
-                size--;
-                return (T) value;
-            }
-        }
-        return null;
+        T value = (T) defaultArray[index];
+        Object[] list = new Object[defaultArray.length - 1];
+        System.arraycopy(defaultArray, 0, list, 0, index);
+        System.arraycopy(defaultArray, index + 1, list, index, defaultArray.length - (index + 1));
+        defaultArray = list;
+        size--;
+        return value;
     }
 
     /**
@@ -172,7 +172,9 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public boolean contains(T obj) {
         for (Object o : defaultArray) {
-            if (Objects.equals(o, obj)) return true;
+            if (Objects.equals(o, obj)) {
+                return true;
+            }
         }
         return false;
     }
@@ -186,18 +188,16 @@ public class MyArrayList<T> implements MyList<T> {
      */
     @Override
     public boolean addAll(MyList<? extends T> myList) {
-        Object[] list = myList.toArray(new Object[myList.size()]);
-        if (list.length == 0) return false;
-        for (int i = 0; i < defaultArray.length; i++) {
-            if (i == list.length) {
-                Object[] objects = new Object[defaultArray.length + list.length];
-                System.arraycopy(defaultArray, 0, objects, 0, defaultArray.length);
-                System.arraycopy(list, 0, objects, defaultArray.length, list.length);
-                defaultArray = objects;
-                return true;
-            }
+        if (myList.size() == 0) {
+            return false;
         }
-        return false;
+        Object[] list = myList.toArray();
+        Object[] objects = new Object[defaultArray.length + list.length];
+        System.arraycopy(defaultArray, 0, objects, 0, size);
+        System.arraycopy(list, 0, objects, size, myList.size());
+        defaultArray = objects;
+        size = size + myList.size();
+        return true;
     }
 
     /**
@@ -210,7 +210,9 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public int indexOf(T obj) {
         for (int i = 0; i < defaultArray.length; i++) {
-            if (defaultArray[i] == obj) return i;
+            if (defaultArray[i] == obj) {
+                return i;
+            }
         }
         return -1;
     }
@@ -222,10 +224,10 @@ public class MyArrayList<T> implements MyList<T> {
      * @return The array with your elements or empty
      */
     @Override
-    public Object[] toArray(Object[] objects) {
+    public <T> T[] toArray(T[] objects) {
         Object[] list = new Object[objects.length];
         System.arraycopy(defaultArray, 0, list, 0, objects.length);
-        return list;
+        return (T[]) list;
     }
 
     /**
@@ -239,14 +241,9 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public T set(int index, T obj) {
         checkLength(index);
-        for (int i = 0; i < defaultArray.length; i++) {
-            if (index == i && defaultArray[i] != null) {
-                Object value = defaultArray[i];
-                defaultArray[i] = obj;
-                return (T) value;
-            }
-        }
-        return null;
+        T value = (T) defaultArray[index];
+        defaultArray[index] = obj;
+        return (T) value;
     }
 
     /**
@@ -259,10 +256,7 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public T get(int index) {
         checkLength(index);
-        for (int i = 0; i < defaultArray.length; i++) {
-            if (i == index && defaultArray[i] != null) return (T) defaultArray[i];
-        }
-        return null;
+        return (T) defaultArray[index];
     }
 
     /**
@@ -334,6 +328,18 @@ public class MyArrayList<T> implements MyList<T> {
         if (high > i) quickSort(array, i, high, comparator);
     }
 
+    private void checkLength(int index) {
+        if (index > defaultArray.length || index < 0) {
+            throw new InvalidArgumentException("Invalid bond");
+        }
+    }
+
+    private void enhanceLength() {
+        Object[] list = new Object[defaultArray.length + 1];
+        System.arraycopy(defaultArray, 0, list, 0, defaultArray.length - 1);
+        defaultArray = list;
+    }
+
     /**
      * Basic realization "equals"
      *
@@ -347,10 +353,6 @@ public class MyArrayList<T> implements MyList<T> {
         if (o == null || getClass() != o.getClass()) return false;
         MyArrayList<?> that = (MyArrayList<?>) o;
         return size == that.size && Arrays.equals(defaultArray, that.defaultArray);
-    }
-
-    private void checkLength(int index) {
-        if (index > defaultArray.length || index < 0) throw new IndexOutOfBoundsException("Invalid bond");
     }
 
     /**

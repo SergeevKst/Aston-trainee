@@ -30,7 +30,7 @@ public interface MyList<T> {
 
     int indexOf(T obj);
 
-    Object[] toArray(Object[] objects);
+    <T> T[] toArray(T[] objects);
 
     T set(int index, T obj);
 
